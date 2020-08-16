@@ -1,0 +1,8 @@
+[centos8]
+nginx2
+ansible2
+dns2
+[loadbalancer]
+nginx2
+[dns]
+dns2
