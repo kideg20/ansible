@@ -1,0 +1,93 @@
+---
+- name: Install and configure nginx loadbalancer
+  hosts:
+  - loadbalancer
+  tasks:
+  - name: Copy nginx repository to repos.d
+    copy:
+      src: nginx.repo
+      dest: /etc/yum.repos.d/ginx.repo
+  - name: Install nginx
+    yum:
+      name: nginx
+      state: present
+      disablerepo: "*"
+      enablerepo: "nginx-stable"
+    notify: Restart nginx
+  - name: enable service nginx
+    systemd:
+      name: nginx
+      enabled: yes
+  - name: Set httpd_can_network_connect flag on and keep it persistent across reboots
+    seboolean:
+      name: httpd_can_network_connect
+      state: yes
+      persistent: yes
+    notify: Restart nginx
+  - name: Set httpd_graceful_shutdown flag on and keep it persistent across reboots
+    seboolean:
+      name: httpd_graceful_shutdown
+      state: yes
+      persistent: yes
+    notify: Restart nginx
+  - name: Set httpd_can_network_relay flag on and keep it persistent across reboots
+    seboolean:
+      name: httpd_can_network_relay
+      state: yes
+      persistent: yes
+    notify: Restart nginx
+  - name: Set nis_enabled flag on and keep it persistent across reboots
+    seboolean:
+      name: nis_enabled
+      state: yes
+      persistent: yes
+    notify: Restart nginx
+  - name: ENABLE https in firewall
+    firewalld:
+      service: https
+      permanent: yes
+      state: enabled
+    notify: Restart nginx
+  - name: ENABLE https in firewall
+    firewalld:
+      service: http
+      permanent: yes
+      state: enabled
+    notify: Restart nginx
+  - name: Copy del.lv site configuration
+    copy:
+      src: nginx.conf.d.del.lv.conf
+      dest: /etc/nginx/conf.d/del.lv.conf
+    notify: Restart nginx
+  - name: Copy nginx.conf site configuration
+    copy:
+      src: etc.nginx.nginx.conf
+      dest: /etc/nginx/nginx.conf
+    notify: Restart nginx
+  - name: Create a /etc/pki/nginx directory if it does not exist
+    file:
+      path: /etc/pki/nginx
+      state: directory
+      mode: '0755'
+    notify: Restart nginx
+  - name: Copy Private key
+    copy:
+      src: etc.pki.nginx.new.server.key
+      dest: /etc/pki/nginx/server.key
+      mode: '0600'
+    notify: Restart nginx
+  - name: Copy Public certificate
+    copy:
+      src: etc.pki.nginx.new.public.cer
+      dest: /etc/pki/nginx/public.cer
+    notify: Restart nginx
+  - name: Copy dhparam
+    copy:
+      src: etc.pki.nginx.dhparam.pem
+      dest: /etc/pki/nginx/dhparam.pem
+    notify: Restart nginx
+  handlers:
+  - name: Restart nginx
+    systemd:
+      state: restarted
+      name: nginx
