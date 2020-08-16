@@ -1,0 +1,40 @@
+---
+- name: Install and configure BIND DNS server
+  hosts:
+  - dns
+  tasks:
+  - name: Install bind
+    yum:
+      name: bind
+      state: present
+    notify: Restart named
+  - name: Install bind utils
+    yum:
+      name: bind-utils
+      state: present
+    notify: Restart named
+  - name: enable service named
+    systemd:
+      name: named
+      enabled: yes
+  - name: ENABLE DNS in firewall
+    firewalld:
+      service: dns
+      permanent: yes
+      immediate: yes
+      state: enabled
+  - name: Copy named.conf configuration
+    copy:
+      src: etc.named.conf
+      dest: /etc/named.conf
+    notify: Restart named
+  - name: Copy del.lv configuration
+    copy:
+      src: var.named.del.lv
+      dest: /var/named/del.lv
+    notify: Restart named
+  handlers:
+  - name: Restart named
+    systemd:
+      state: restarted
+      name: named
