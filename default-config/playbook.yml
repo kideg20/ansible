@@ -1,0 +1,26 @@
+---
+- name: Default config
+  hosts:
+    - centos8
+  tasks:
+  - name: Change dns and search domain
+    template:
+      src: resolv.conf
+      dest: /etc/resolv.conf
+  - name: Install vim-enhanced
+    yum: name=vim-enhanced state=latest
+  - name: Configure vimrc
+    template:
+      src: vimrc
+      dest: /root/.vimrc
+  - name: Change bashrc
+    template:
+      src: bashrc
+      dest: /root/.bashrc
+  - name: Install Default Programms
+    yum:
+      name:
+        - net-tools
+        - bind-utils
+        - policycoreutils-python-utils
+      state: latest
