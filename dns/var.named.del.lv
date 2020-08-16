@@ -1,0 +1,13 @@
+$TTL 3305
+del.lv.     IN      SOA     ns1.del.lv. admin.del.lv (
+                        2020080413 ; serial
+                        10800      ; refresh
+                        3600       ; retry
+                        1209600    ; expiry
+                        38400 )    ; negative ttl
+del.lv.         IN      NS      ns1.del.lv.
+www     IN  A 89.201.4.44
+ns1     IN  A 89.201.4.44
+@     IN  A 89.201.4.44
+@     IN CAA 0 issue "sectigo.com"
+del.lv. IN CAA 0 issue "sectigo.com"
